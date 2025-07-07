@@ -5,7 +5,9 @@ import cors from "cors"
 
 import { initDB } from "./Database/initDB.js";
 import authRoute from "./routes/auth.routes.js";
+import hrRoute from "./routes/hr.routes.js"
 import { errorHandler } from "./middleware/errorHandler.js";
+import mentorRoute from "./routes/mentor.routes.js";
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use(errorHandler);
 
 //Routes
 app.use("/api/auth", authRoute);
+app.use("/api/hr", hrRoute);
+app.use("/api/mentor", mentorRoute);
 
 app.get("/", (req, res) => {
   res.send("Server running");

@@ -1,4 +1,4 @@
-export default async function createUserCollections(db) {
+export default async function createUserCollection(db) {
   try {
     const collections = await db.listCollections({ name: "users" }).toArray();
     // Check if 'users' collection already exists

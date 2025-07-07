@@ -2,7 +2,6 @@ import connectDB from "../Database/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { createError } from "../utils/createError.js";
 dotenv.config();
 const generateToken = (user) => {
   const payload = {
@@ -22,10 +21,10 @@ const generateToken = (user) => {
 };
 //Refresh Token
 export async function handleRefreshToken(req, res) {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) return res.status(401).json({ message: "No token" });
-
   try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return res.status(401).json({ message: "No token" });
+
     const { username } = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
     const db = await connectDB();
     const users = db.collection("users");
@@ -55,25 +54,32 @@ export async function handleRefreshToken(req, res) {
 
 //Signup
 export async function signup(req, res) {
-  const { username, password, role } = req.body;
-  const db = await connectDB();
-  const users = db.collection("users");
   try {
+    const { username, password, role } = req.body;
     //verify all fields prrovided
     if (!username || !password || !role) {
-      throw createError("All fields are required", 400);
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
+
+    const db = await connectDB();
+    const users = db.collection("users");
+
     //check username exists
     const usernameExists = await users.findOne({ username });
-    if (usernameExists) throw createError("Username already exists", 409);
+    if (usernameExists)
+      return res
+        .status(409)
+        .json({ success: false, message: "User already exists" });
     const hashedPassword = await bcrypt.hash(password, 10);
-    //instert into DB
+    //instert new user into DB
     const result = await users.insertOne({
       username,
       password: hashedPassword,
       role,
     });
-    const user = { username: username, role: role };
+    const user = { username: result.username, role: result.role };
     const tokens = generateToken(user);
     return res
       .status(201)
@@ -86,31 +92,40 @@ export async function signup(req, res) {
       .json({
         message: "Signup Sucessfull",
         accessToken: tokens.accessToken,
-        username: username,
+        userId: result._id,
+        username: result.username,
       });
   } catch (error) {
-    console.error("Signup error:", error);
-    throw createError("Signup failed", 500);
+    console.error("Signup failed:", error);
+    return res.status(500).json({ success: false, message: "Signup failed" });
   }
 }
 //Login
 export async function login(req, res) {
-  const { username, password, role } = req.body;
-
-  const db = await connectDB();
-  const users = db.collection("users");
   try {
+    const { username, password, role } = req.body;
     //verify all fields prrovided
     if (!username || !password || !role)
-      throw createError("All fields are required", 400);
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
+
+    const db = await connectDB();
+    const users = db.collection("users");
 
     //check user exists
     const user = await users.findOne({ username });
-    if (!user) throw createError("Invalid email or password", 401);
+    if (!user)
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
 
     //Check Pass
     const passCheck = await bcrypt.compare(password, user.password);
-    if (!passCheck) throw createError("Invalid email or password", 401);
+    if (!passCheck)
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
 
     const tokens = generateToken(user);
     return res
@@ -124,13 +139,14 @@ export async function login(req, res) {
       .json({
         message: "Login Sucessfull",
         accessToken: tokens.accessToken,
-        username: username,
+        userId: user._id,
+        username: user.username,
       });
 
     //instert into DB
   } catch (error) {
-    console.error("Signup error:", error);
-    throw createError("Login failed", 500);
+    console.error("Login failed:", error);
+    return res.status(500).json({ success: false, message: "Login failed" });
   }
 }
 
