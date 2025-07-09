@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import { logIn, home } from "./routes/Routes";
-
+import { logIn, home, intern, project } from "./routes/Routes";
+import ProjectForm from "./components/Mentor/ProjectForm.jsx";
+import InternForm from "./components/Hr/InternForm.jsx";
 import { LoginPage, HomePage } from "./pages/index.pages.js";
 import useTokenRefresher from "./hooks/useTokenRefresher.js";
 
@@ -10,6 +11,8 @@ function App() {
     <Routes>
       <Route path={logIn} element={<LoginPage />} />
       <Route path={home} element={<HomePage />} />
+      <Route path={intern} element={<InternForm />} />
+      <Route path={project} element={<ProjectForm />} />
     </Routes>
   );
 }

@@ -1,17 +1,32 @@
-
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { login } from "../../store/authSlice";
 
 function Signup() {
   const { register, handleSubmit } = useForm();
+  const [authError, setAuthError] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
     try {
       const API_URL = import.meta.env.VITE_API_BASE_URL;
-      const response = await axios.post(`${API_URL}/auth/signup`, data);
-      console.log("✅ Signup successful:", response.data);
+      const response = await axios.post(`${API_URL}/auth/signup`, data, {
+        withCredentials: true,
+      });
+      // console.log("✅ Signup successful:", response.data);ONLY for testing
+      dispatch(login(response.data));
+      navigate("/");
     } catch (error) {
       console.error("❌ Signup error:", error.response?.data || error.message);
+      if (error.response) {
+        setAuthError(error.response.data.message);
+      } else {
+        setAuthError("Signup failed. Please try again.");
+      }
     }
   };
 
@@ -60,7 +75,7 @@ function Signup() {
             </label>
           </div>
         </div>
-
+        {authError && <p className="text-red-500 text-sm">{authError}</p>}
         <button type="submit" style={{ marginTop: "1rem" }}>
           Sign Up
         </button>

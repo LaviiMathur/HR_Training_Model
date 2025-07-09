@@ -7,7 +7,9 @@ const generateToken = (user) => {
   const payload = {
     username: user.username,
     role: user.role,
+    userId: user._id.toString(),
   };
+  console.log("payload:", payload);
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "15m",
@@ -32,6 +34,12 @@ export async function handleRefreshToken(req, res) {
     if (!user) throw createError("user no longer exists", 401);
 
     const tokens = generateToken(user);
+    console.log("Sending refresh response:", {
+      username: user.username,
+      userId: user._id.toString(),
+      role: user.role,
+    });
+
     return res
       .status(200)
       .cookie("refreshToken", tokens.refreshToken, {
@@ -43,7 +51,9 @@ export async function handleRefreshToken(req, res) {
       .json({
         message: "accessToken refreshed",
         accessToken: tokens.accessToken,
-        username: username,
+        username: user.username,
+        role: user.role,
+        userId: user._id.toString(),
       });
   } catch (err) {
     return res
@@ -94,6 +104,7 @@ export async function signup(req, res) {
         accessToken: tokens.accessToken,
         userId: result._id,
         username: result.username,
+        role: user.role,
       });
   } catch (error) {
     console.error("Signup failed:", error);
@@ -141,6 +152,7 @@ export async function login(req, res) {
         accessToken: tokens.accessToken,
         userId: user._id,
         username: user.username,
+        role: user.role,
       });
 
     //instert into DB

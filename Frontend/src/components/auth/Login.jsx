@@ -3,26 +3,31 @@ import axios from "axios";
 import { Logo } from "../index.components";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { login } from "../../store/authSlice";
 
 function Login() {
   const status = useSelector((state) => state.auth.loggedIn);
   const dispatch = useDispatch();
-
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState("");
   const onSubmit = async (data) => {
     try {
       const API_URL = import.meta.env.VITE_API_BASE_URL;
       const response = await axios.post(`${API_URL}/auth/login`, data, {
         withCredentials: true,
       });
-      console.log("✅ Login successful:", response.data);
+      // console.log("Login successful:", response.data); ONLY for testing
       dispatch(login(response.data));
       navigate("/");
     } catch (error) {
       console.error("❌ Login error:", error.message);
+      if (error.response) {
+        setAuthError(error.response.data.message);
+      } else {
+        setAuthError("Login failed. Please try again.");
+      }
     }
   };
   useEffect(() => {
@@ -109,6 +114,8 @@ function Login() {
               className=" bg-white rounded-md p-2 border-2 border-[#9CC7FF] outline-blue-600"
             />
           </div>
+          {authError && <p className="text-red-500 text-sm">{authError}</p>}
+
           <button
             className="submit text-white font-bold font-serif  tracking-wider text-3xl text-shadow-[0px_2px_4px_#00000060] bg-[#9CC7FF] py-4 px-10 rounded-md 
             drop-shadow-[4px_4px_4px_#00000025] active:scale-90"
@@ -117,8 +124,6 @@ function Login() {
           </button>
         </form>
       </div>
-
-      <div></div>
     </div>
   );
 }
