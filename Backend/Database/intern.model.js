@@ -3,6 +3,8 @@ export default async function createInternCollection(db) {
     const collections = await db.listCollections({ name: "interns" }).toArray();
     if (collections.length > 0) {
       console.log("ℹ️ 'interns' collection already exists");
+      // await db.collection("interns").drop();
+
       return;
     }
 
@@ -10,19 +12,42 @@ export default async function createInternCollection(db) {
       validator: {
         $jsonSchema: {
           bsonType: "object",
-          required: ["firstName", "secondName","age","address","mobile","status"],
+          required: [
+            "firstName",
+            "lastName",
+            "age",
+            "address",
+            "mobile",
+            "status",
+            "email",
+            "department",
+            "university",
+            "startDate",
+          ],
           properties: {
             firstName: {
               bsonType: "string",
               description: "Intern's first name",
             },
-            secondName: {
+            lastName: {
               bsonType: "string",
-              description: "Intern's second name",
+              description: "Intern's last name",
             },
             age: {
               bsonType: "number",
               description: "Intern's age",
+            },
+            email: {
+              bsonType: "string",
+              description: "Intern's email address",
+            },
+            department: {
+              bsonType: "string",
+              description: "Intern's  department",
+            },
+            university: {
+              bsonType: "string",
+              description: "Intern's university",
             },
             mobile: {
               bsonType: "number",
@@ -34,8 +59,12 @@ export default async function createInternCollection(db) {
             },
             status: {
               bsonType: "string",
-              enum: ["accepted", "pending", "rejected"],
+              enum: ["accepted", "pending", "notAssigned"],
               description: "Mentor Assignment status",
+            },
+            mentor: {
+              bsonType: "string",
+              description: "Mentor assigned to the intern",
             },
             mentorId: {
               bsonType: "objectId",
@@ -45,6 +74,10 @@ export default async function createInternCollection(db) {
               bsonType: "array",
               items: { bsonType: "objectId" },
               description: "List of project IDs assigned to the intern",
+            },
+            startDate: {
+              bsonType: "string",
+              description: "Intern's start date",
             },
           },
         },

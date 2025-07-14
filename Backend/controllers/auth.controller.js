@@ -2,6 +2,7 @@ import connectDB from "../Database/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 dotenv.config();
 const generateToken = (user) => {
   const payload = {
@@ -9,7 +10,6 @@ const generateToken = (user) => {
     role: user.role,
     userId: user._id.toString(),
   };
-  console.log("payload:", payload);
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "15m",
@@ -34,11 +34,6 @@ export async function handleRefreshToken(req, res) {
     if (!user) throw createError("user no longer exists", 401);
 
     const tokens = generateToken(user);
-    console.log("Sending refresh response:", {
-      username: user.username,
-      userId: user._id.toString(),
-      role: user.role,
-    });
 
     return res
       .status(200)
@@ -170,4 +165,28 @@ export async function logout(req, res) {
     sameSite: "Strict",
   });
   return res.status(200).json({ message: "Logged out" });
+}
+//fetch Notification
+export async function fetchNotifications(req, res) {
+  try {
+    const db = await connectDB();
+    const notifications = db.collection("notifications");
+
+    const user = req.body.userId;
+    const userId = new ObjectId(user);
+
+    const userNotifications = await notifications
+      .find({ receiver: userId })
+      .toArray();
+
+    return res.status(200).json({
+      success: true,
+      notifications: userNotifications,
+    });
+  } catch (error) {
+    console.error("Failed to fetch notifications:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch notifications" });
+  }
 }

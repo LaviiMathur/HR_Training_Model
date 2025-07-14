@@ -6,6 +6,8 @@ import {
   ProjectForm,
   InternForm,
   Profile,
+  AssignMentors,
+  Notification
 } from "../index.components";
 
 function NavBar() {
@@ -14,8 +16,21 @@ function NavBar() {
   const [renderComponent, setRenderComponent] = useState(<MentorList />);
   const [selectedIndex, setSelectedIndex] = useState(0);
   useEffect(() => {
-    const hrNav = ["Mentor list", "New Intern", "Profile"];
-    const mentorNav = ["Intern list", "Project List", "Profile"];
+    const hrNav = [
+      { label: "Mentor list", icon: "article_person" },
+      { label: "New Intern", icon: "person_add" },
+      { label: "Profile", icon: "account_circle" },
+      { label: "Assign Mentor", icon: "account_circle" },
+      { label: "notification", icon: "notifications" },
+    ];
+
+    const mentorNav = [
+      { label: "Intern list", icon: "group" },
+      { label: "Project List", icon: "list_alt" },
+      { label: "Profile", icon: "account_circle" },
+      { label: "notification", icon: "notifications" },
+    ];
+
     if (user.role === "hr" && navItems !== hrNav) {
       setNavItems(hrNav);
     }
@@ -29,11 +44,14 @@ function NavBar() {
       if (i == 0) setRenderComponent(<MentorList />);
       if (i == 1) setRenderComponent(<InternForm />);
       if (i == 2) setRenderComponent(<Profile />);
+      if (i == 3) setRenderComponent(<AssignMentors />);
+      if (i == 4) setRenderComponent(<Notification />);
     }
     if (user.role === "mentor") {
       if (i == 0) setRenderComponent(<InternList />);
       if (i == 1) setRenderComponent(<MentorList />);
       if (i == 2) setRenderComponent(<Profile />);
+      if (i == 3) setRenderComponent(<Notification />);
     }
   };
   return (
@@ -49,9 +67,7 @@ function NavBar() {
               key={i}
               tabIndex={0}
               role="button"
-              onClick={() => {
-                return handleClick(i);
-              }}
+              onClick={() => handleClick(i)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") setSelectedIndex(i);
               }}
@@ -59,22 +75,24 @@ function NavBar() {
         cursor-pointer
         bg-blue-200
         p-2
-         border-blue-400 border-0
+        border-blue-400 border-0
         ${isFirst ? "rounded-tl-md" : ""}
         ${isLast ? "rounded-tr-md" : ""}
         ${
           isSelected
-            ? "bg-blue-500 text-white  scale-110 z-10"
-            : " hover:bg-blue-300"
+            ? "bg-blue-500 text-white scale-110 z-10"
+            : "hover:bg-blue-300"
         }
-       
       `}
               style={{
                 borderLeftWidth: isFirst ? "1px" : "0",
                 borderRightWidth: isLast ? "1px" : "0",
               }}
             >
-              {item}
+              <>
+                <span className="material-symbols-outlined">{item.icon}</span>
+                {item.label}
+              </>
             </span>
           );
         })}

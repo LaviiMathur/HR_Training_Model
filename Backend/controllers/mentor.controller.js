@@ -4,7 +4,7 @@ import connectDB from "../Database/db.js";
 export async function createProject(req, res) {
   try {
     const { name, description, mentorId } = req.body;
- 
+
     if (!name || !description || !mentorId) {
       return res
         .status(400)
@@ -133,5 +133,99 @@ export async function projectCompleted(req, res) {
     return res
       .status(500)
       .json({ success: false, message: "Failed to mark project as done" });
+  }
+}
+//Accept the intern
+export async function acceptIntern(req, res) {
+  try {
+    const { mentor, intern, noti } = req.body;
+    const db = await connectDB();
+    const mentorId = new ObjectId(mentor);
+    const internId = new ObjectId(intern);
+    const notiId = new ObjectId(noti);
+    const interns = db.collection("interns");
+    const mentors = db.collection("users");
+    const internDoc = await interns.findOne({ _id: internId });
+    const mentorDoc = await mentors.findOne({ _id: mentorId });
+    if (!internDoc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Intern does not exist" });
+    }
+
+    if (!mentorDoc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Mentor does not exist" });
+    }
+    const notifications = db.collection("notifications");
+    await notifications.deleteOne({ _id: notiId });
+    //update mentor in DB
+    await interns.updateOne(
+      { _id: internId },
+      {
+        $set: {
+          mentorId: mentorDoc._id,
+          mentor: mentorDoc.username,
+          status: "accepted",
+        },
+      }
+    );
+    return res.status(200).json({
+      message: "Mentor assigned successfully",
+      internId: internId,
+      intern: internDoc.firstName + " " + internDoc.lastName,
+      mentor: mentor,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+//Reject the intern
+export async function rejectIntern(req, res) {
+  try {
+    const { sender, receiver, intern, remarks, noti } = req.body;
+    const db = await connectDB();
+    const hrId = new ObjectId(receiver);
+    const mentorId = new ObjectId(sender);
+    const internId = new ObjectId(intern);
+    const notiId = new ObjectId(noti);
+    const interns = db.collection("interns");
+    const hr = db.collection("users");
+    const internDoc = await interns.findOne({ _id: internId });
+    const hrDoc = await hr.findOne({ _id: hrId });
+ 
+    if (!internDoc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Intern does not exist" });
+    }
+
+    if (!remarks) {
+      return res
+        .status(404)
+        .json({ success: false, message: "remarks are required" });
+    }
+    //create notification for mentor
+    const notifications = db.collection("notifications");
+    const notification = {
+      receiver: hrId,
+      sender: mentorId,
+      internId: internId,
+      internName: internDoc.firstName + " " + internDoc.lastName,
+      message: `Sorry I cannot accept ${
+        internDoc.firstName + " " + internDoc.lastName
+      }. Here are my remarks:${remarks}`,
+      marked: false,
+      createdAt: new Date(),
+    };
+    await notifications.deleteOne({ _id: notiId });
+    await notifications.insertOne(notification);
+    return res.status(200).json({
+      success: true,
+      message: "HR Notified",
+    });
+  } catch (error) {
+    console.error(error);
   }
 }

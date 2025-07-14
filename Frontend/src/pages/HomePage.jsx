@@ -1,20 +1,25 @@
 import { useEffect } from "react";
-import { NavBar } from "../components/index.components";
+import { Logo, NavBar } from "../components/index.components";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 export default function HomePage() {
   const navigate = useNavigate();
-  const status = useSelector((state) => state.auth.loggedIn);
+  const user = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!status) {
+    if (!user.loggedIn) {
       navigate("/auth/login");
     }
-  }, [status, navigate]);
+  }, [user, navigate]);
 
   return (
-    <div className=" bg-[#232323]  w-dvw h-dvh place-items-center grid">
-      <h1 className="text-9xl text-white">Home</h1>
+    <div className="  h-dvh w-8/10  grid m-auto">
+      <Logo h={150} className="m-auto w-full" />
+
+      <h2 className="text-4xl text-left capitalize font-[300]">
+        Welcome Back, <span className="font-[600]">{user.user}</span>{" "}
+        {user.role}
+      </h2>
 
       <NavBar />
     </div>

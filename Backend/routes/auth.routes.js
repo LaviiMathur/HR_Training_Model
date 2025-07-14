@@ -1,5 +1,5 @@
 import express from "express";
-import { signup,login, logout, handleRefreshToken } from "../controllers/auth.controller.js";
+import { signup,login, logout, handleRefreshToken, fetchNotifications } from "../controllers/auth.controller.js";
 
 const authRoute = express.Router();
 
@@ -11,5 +11,6 @@ authRoute.post("/login", login);
 authRoute.post("/logout", logout);
 //refresh token Route
 authRoute.post("/refresh", handleRefreshToken);
+authRoute.post("/fetchNotifications", fetchNotifications);
 
 export default authRoute;

@@ -10,7 +10,7 @@ export default function InternForm({ intern: existingIntern }) {
   const navigate = useNavigate();
   useEffect(() => {
     if (!user.loggedIn || user.role !== "hr") {
-      console.log(user)
+      
       console.warn("Access denied: HR status required. Redirecting to login.");
       navigate("/auth/login");
     }
@@ -22,25 +22,24 @@ export default function InternForm({ intern: existingIntern }) {
     formState: { errors },
   } = useForm({
     firstName: existingIntern?.firstName ?? "",
-    secondName: existingIntern?.secondName ?? "",
+    lastName: existingIntern?.lastName ?? "",
     age: existingIntern?.age ?? "",
     address: existingIntern?.address ?? "",
     mobile: existingIntern?.mobile ?? "",
+    email: existingIntern?.email ?? "",
+    department: existingIntern?.department ?? "",
+    university: existingIntern?.university ?? "",
   });
   const onSubmit = async (data) => {
     try {
       const API_URL = import.meta.env.VITE_API_BASE_URL;
-      const response = await axios.post(`${API_URL}/hr/createIntern`, data);
-      console.log("✅ Intern created:", response.data);
+      await axios.post(`${API_URL}/hr/createIntern`, data);
+     
     } catch (error) {
-      console.error(
-        "❌ Intern creation failed:",
-        error.response?.data || error.message
-      );
       if (error.response) {
         setInternError(error.response.data.message);
       } else {
-        setInternError("Creation failed. Please try again.");
+        setInternError(error.message);
       }
     }
   };
@@ -50,17 +49,8 @@ export default function InternForm({ intern: existingIntern }) {
       <h2 className="text-xl font-semibold mb-6">
         Training Internship Registration Form
       </h2>
-      <p className="text-sm text-gray-600 mb-6">
-        (Appendix 'A' to letter No.Admin./31106/Policy, RD-Security Dated: 10
-        Nov, 97)
-      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="font-medium">FORMAT 'A'</span>
-          <span className="text-sm text-gray-600">No.1805/__/HR/SPL</span>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label
@@ -82,24 +72,22 @@ export default function InternForm({ intern: existingIntern }) {
           </div>
           <div>
             <label
-              htmlFor="secondName"
+              htmlFor="lastName"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              2. Second Name
+              2. Last Name
             </label>
             <input
               type="text"
-              id="secondName"
-              {...register("secondName", {
-                required: "secondName is required",
+              id="lastName"
+              {...register("lastName", {
+                required: "lastName is required",
               })}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />{" "}
-            {errors.secondName && (
-              <p className="text-red-500 text-sm">
-                {errors.secondName.message}
-              </p>
+            {errors.lastName && (
+              <p className="text-red-500 text-sm">{errors.lastName.message}</p>
             )}
           </div>
           <div>
@@ -122,15 +110,33 @@ export default function InternForm({ intern: existingIntern }) {
           </div>
           <div>
             <label
-              htmlFor="firstName"
+              htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              4. Phone Number
+              4. Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              {...register("email", { required: "Email is required" })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />{" "}
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="mobile"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              5. Phone number
             </label>
             <input
               type="number"
               id="mobile"
-              {...register("mobile", { required: "Phone Number is required" })}
+              {...register("mobile", { required: "mobile is required" })}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />{" "}
@@ -140,24 +146,90 @@ export default function InternForm({ intern: existingIntern }) {
           </div>
           <div>
             <label
-              htmlFor="firstName"
+              htmlFor="address"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              5. Address
+              6. Address
             </label>
             <input
               type="text"
               id="address"
               {...register("address", { required: "Address is required" })}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-blue-500"
             />{" "}
             {errors.address && (
               <p className="text-red-500 text-sm">{errors.address.message}</p>
             )}
           </div>
+          <div>
+            <label
+              htmlFor="university"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              7. University
+            </label>
+            <input
+              type="text"
+              id="university"
+              {...register("university", {
+                required: "university is required",
+              })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md capitalize focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />{" "}
+            {errors.university && (
+              <p className="text-red-500 text-sm">
+                {errors.university.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="department"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              8. Department
+            </label>
+            <input
+              type="text"
+              id="department"
+              {...register("department", {
+                required: "department is required",
+              })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none  focus:ring-2 focus:ring-blue-500"
+            />{" "}
+            {errors.department && (
+              <p className="text-red-500 text-sm">
+                {errors.department.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="startDate"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              9. Start Date
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              {...register("startDate", {
+                required: "Start Date is required",
+              })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none  focus:ring-2 focus:ring-blue-500"
+            />{" "}
+            {errors.startDate && (
+              <p className="text-red-500 text-sm">{errors.startDate.message}</p>
+            )}
+          </div>
         </div>
-        {internError && <p className="text-red-500 text-sm">{internError}</p>}
+        {internError && (
+          <p className="text-red-500 text-sm text-center">{internError}</p>
+        )}
         <div className="flex justify-center">
           <button
             type="submit"

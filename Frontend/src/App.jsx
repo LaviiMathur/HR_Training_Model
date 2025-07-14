@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { logIn, home, intern, project } from "./routes/Routes";
+import { logIn, home, intern, project } from "./routes/Routes.js";
 import ProjectForm from "./components/Mentor/ProjectForm.jsx";
 import InternForm from "./components/Hr/InternForm.jsx";
 import { LoginPage, HomePage } from "./pages/index.pages.js";

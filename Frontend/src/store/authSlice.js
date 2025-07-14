@@ -13,8 +13,7 @@ export const checkAuth = createAsyncThunk("auth/check", async () => {
   return res.data;
 });
 
-const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-
+const storedUser = JSON.parse(localStorage.getItem("user") || null);
 
 const authSlice = createSlice({
   name: "auth",
@@ -32,7 +31,6 @@ const authSlice = createSlice({
       state.userId = userId;
       state.role = role;
       localStorage.setItem("user", JSON.stringify({ username, role, userId }));
-
     },
     logout: (state) => {
       state.loggedIn = false;
@@ -50,7 +48,10 @@ const authSlice = createSlice({
         state.user = username;
         state.role = role;
         state.userId = userId;
-        localStorage.setItem("user", JSON.stringify({ username, role, userId }));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ username, role, userId })
+        );
       })
       .addCase(checkAuth.rejected, (state) => {
         state.loggedIn = false;

@@ -1,25 +1,26 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import cors from "cors"
+import cors from "cors";
 
 import { initDB } from "./Database/initDB.js";
 import authRoute from "./routes/auth.routes.js";
-import hrRoute from "./routes/hr.routes.js"
+import hrRoute from "./routes/hr.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import mentorRoute from "./routes/mentor.routes.js";
 
 dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
-    credentials: true, // allows cookies
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
 app.use(errorHandler);
@@ -28,6 +29,7 @@ app.use(errorHandler);
 app.use("/api/auth", authRoute);
 app.use("/api/hr", hrRoute);
 app.use("/api/mentor", mentorRoute);
+
 
 app.get("/", (req, res) => {
   res.send("Server running");
